@@ -1,0 +1,22 @@
+📂 MASTER ASSET MANIFEST: 2KLEIGH.COM
+Sync Date: January 13, 2026
+Status: Live (Production)
+Version: BIC-1.0 (Best In Class)
+
+1. The Code (Logic)
+* Repository: itskleigh-final
+* Commit ID: 749c6ad (Fix: Syntax Resolved)
+* Key File: components/Hero.tsx
+
+2. The Assets (Visuals)
+* Corporate Logo: public/logo.png (G Putnam Music S-Corp Identity)
+* Product QR: public/KLEIGH_QR.png (Kleigh Product Autonomy)
+* Audio Source: Supabase Storage Bucket 'audio' -> Memories.mp3
+
+3. The Commerce (Revenue)
+* Payment Link: https://buy.stripe.com/4gM14n4KD8Zg1zI8ZO9IQ03
+* Destination: G Putnam Music, LLC (S-Corp)
+* Product: "Sponsor CUBs"
+
+4. The Operational Rule
+* "The Mirror Rule": Any asset added to Global-Warehouse must be immediately logged in SB.

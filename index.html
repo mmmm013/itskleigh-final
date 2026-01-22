@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuala KLEIGH: Living with Love | Australian Music Artist</title>
+  
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    /* GLOBAL STYLES */
+    body, html { margin: 0; padding: 0; font-family: sans-serif; }
+
+    /* TITLE SCREEN STYLES */
+    #splash-screen {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+        background-color: #000; color: #fff;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        z-index: 99999; transition: opacity 0.8s ease-out, visibility 0.8s;
+    }
+    #splash-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .splash-title { font-family: 'Courier New', monospace; font-size: 4rem; letter-spacing: 8px; margin-bottom: 10px; text-transform: uppercase; text-align: center; }
+    .splash-subtitle { font-family: sans-serif; font-size: 1.2rem; letter-spacing: 4px; color: #888; margin-bottom: 40px; text-transform: uppercase; }
+    .splash-btn { padding: 15px 40px; border: 1px solid #fff; background: transparent; color: #fff; font-family: 'Courier New', monospace; font-size: 1rem; text-transform: uppercase; letter-spacing: 3px; cursor: pointer; transition: all 0.3s; }
+    .splash-btn:hover { background-color: #fff; color: #000; }
+    
+    /* MUSIC SECTION STYLES */
+    .music-container {
+        background: #111; color: #fff; padding: 40px; text-align: center; border-radius: 12px; margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="splash-screen">
+      <h1 class="splash-title">ITSKLEIGH</h1>
+      <p class="splash-subtitle">THE NEW ERA</p>
+      <button class="splash-btn" onclick="enterSite()">ENTER SITE</button>
+  </div>
+
+  <nav>
+    <div class="container nav-content">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img src="assets/favicon.png" width="28" height="28" alt="KLEIGH logo">
+        <strong>KLEIGH</strong>
+      </div>
+      <div class="nav-links">
+        <a href="#about">About</a>
+        <a href="#music">Music</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="container hero-grid">
+      <div class="hero-left">
+        <img class="logo" src="assets/GPM-Logo.jpg" alt="G Putnam Music LLC">
+        <h1>“Kuala KLEIGH - Living with Love”</h1>
+        <div class="tag">Krooning from Down Under!</div>
+      </div>
+      <div class="hero-right">
+        <img src="assets/kleigh_portrait.jpg" alt="KLEIGH portrait" width="240" height="320">
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="about" class="section">
+      <div class="container">
+        <h2>About KLEIGH</h2>
+        <p>KLEIGH was born in Bendigo, Australia... A voice like warm buttery popcorn.</p>
+      </div>
+    </section>
+
+    <section id="music" class="section">
+      <div class="container">
+        <h3>Latest Release</h3>
+        <div class="music-container">
+            <p><strong>STREAMING NOW</strong></p>
+            <p>Listen to the full EPK and Catalogue via DISCO</p>
+            <br>
+            <a href="epk.html" style="background:#4ADE80; color:#000; padding:12px 24px; text-decoration:none; font-weight:bold; border-radius:4px;">LAUNCH PLAYER &rarr;</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="container">
+        <h3>Contact</h3>
+        <p>Email: <a href="mailto:info@musicmaykers.com">info@musicmaykers.com</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      ©2025 musicmaykers, llc | <a href="epk.html">Full EPK →</a>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+  <script>
+    function enterSite() { document.getElementById('splash-screen').classList.add('hidden'); }
+  </script>
+</body>
+</html>
