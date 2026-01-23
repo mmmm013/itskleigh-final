@@ -61,3 +61,20 @@ npx vercel --prod
 ```
 
 If you want, I can initialize a Git repo in this folder (so CI and standard Vercel flows work) and commit these changes — say the word and I'll do it.
+
+## Supabase Migrations
+
+This repo includes a Supabase migration to enforce idempotent entitlements created by Stripe webhooks. The migration SQL is at:
+
+- `supabase/migrations/20260123170000_add_entitlements_unique_session.sql`
+
+Apply it in one of these ways:
+
+- Use the Supabase Dashboard: open your project → SQL editor → paste the SQL file contents and run.
+- Or run with `psql` against your Postgres instance:
+
+```bash
+psql "postgresql://<user>:<password>@<host>:5432/<db>" -f supabase/migrations/20260123170000_add_entitlements_unique_session.sql
+```
+
+Note: Ensure `SUPABASE_SERVICE_ROLE_KEY` is set in your environment for the webhook route to insert rows.

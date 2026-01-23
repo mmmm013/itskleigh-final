@@ -5,18 +5,21 @@ import { createBrowserClient } from '@supabase/ssr';
 
 // --- TYPES ---
 export interface Track {
-  id: number;
+  id: string | number;
   title: string;
-  artist: string;
-  url: string;      
+  artist?: string;
+  url?: string;
+  audio_url?: string;
+  filename?: string;
   duration?: string;
+  moodColor?: string;
 }
 
 interface PlayerContextType {
   currentTrack: Track | null;
   isPlaying: boolean;
   queue: Track[]; 
-  playTrack: (track: Track, newQueue?: Track[]) => void;
+  playTrack: (track: Track, newQueue?: Track[]) => Promise<void>;
   togglePlay: () => void;
   nextTrack: () => void;
   prevTrack: () => void;
@@ -48,8 +51,33 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         console.error('❌ Error loading music:', error.message);
       } else if (data && data.length > 0) {
         console.log(`✅ Loaded ${data.length} tracks`);
-        setQueue(data);
-        setCurrentTrack(data[0]); // Load the first song
+        // Normalize tracks so they include a `url` field the player can use.
+        const normalized = data.map((d: any) => {
+          const url = d.url || d.audio_url || d.audioUrl || d.filename || undefined;
+          // If filename looks like a simple filename, build a storage path later when used.
+          return {
+            ...d,
+            id: d.id ?? d.filename ?? d.audio_id ?? `${Math.random()}`,
+            title: d.title || d.name || 'Untitled',
+            artist: d.artist || d.album_artist || 'G Putnam Music',
+            url,
+            moodColor: d.moodColor || d.mood || undefined,
+          } as Track;
+        });
+
+        // try to resolve simple filenames into public URLs when possible
+        const BUCKET_URL = process.env.NEXT_PUBLIC_SUPABASE_BUCKET_URL ||
+          'https://eajxgrbxvkhfmmfiotpm.supabase.co/storage/v1/object/public/tracks';
+
+        const withResolved = normalized.map((t: any) => {
+          if (!t.url && t.filename) {
+            return { ...t, url: `${BUCKET_URL}/${encodeURIComponent(t.filename)}` };
+          }
+          return t;
+        });
+
+        setQueue(withResolved);
+        setCurrentTrack(withResolved[0]); // Load the first song
       } else {
         console.warn('⚠️ Connected to tracks table, but found 0 rows.');
       }
@@ -59,9 +87,42 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // 1. Play a specific track 
-  const playTrack = (track: Track, newQueue?: Track[]) => {
-    setCurrentTrack(track);
-    setIsPlaying(true);
+  const playTrack = async (track: Track, newQueue?: Track[]) => {
+    // Resolve URL if missing (support filename -> public bucket)
+    const BUCKET_URL = process.env.NEXT_PUBLIC_SUPABASE_BUCKET_URL ||
+      'https://eajxgrbxvkhfmmfiotpm.supabase.co/storage/v1/object/public/tracks';
+
+    let resolvedUrl = track.url || track.audio_url || (track.filename ? `${BUCKET_URL}/${encodeURIComponent(String(track.filename))}` : undefined);
+
+    // If still unresolved but we have an id, attempt server-side resolution (signed URL)
+    if (!resolvedUrl && track.id) {
+      try {
+        const res = await fetch(`/api/resolve-audio?track_id=${encodeURIComponent(String(track.id))}`);
+        if (res.ok) {
+          const json = await res.json();
+          if (json.url) {
+            resolvedUrl = json.url;
+          } else if (json.access === 'purchase_required') {
+            console.warn('Track requires purchase:', json.message || json);
+            // set current track with no url to allow UI to show locked state
+            const tLocked: Track = { ...track, url: undefined };
+            setCurrentTrack(tLocked);
+            if (newQueue) setQueue(newQueue);
+            return;
+          }
+        } else {
+          const body = await res.json().catch(() => ({}));
+          console.warn('Failed to resolve audio:', body);
+        }
+      } catch (err) {
+        console.error('Error resolving audio URL:', err);
+      }
+    }
+
+    const t: Track = { ...track, url: resolvedUrl };
+
+    setCurrentTrack(t);
+    setIsPlaying(Boolean(resolvedUrl));
     if (newQueue) {
       setQueue(newQueue);
     } else if (queue.length === 0) {

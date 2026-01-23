@@ -1,35 +1,10 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import { Pause, Play } from 'lucide-react';
+import { usePlayer } from '../PlayerContext';
 
-// FIX: Explicitly typing props as 'any' to stop the TypeScript crash
-export default function Player({ 
-  currentTrack, 
-  isPlaying, 
-  onPlayPause, 
-  onNext, 
-  onPrev 
-}: {
-  currentTrack: any;
-  isPlaying: any;
-  onPlayPause: any;
-  onNext: any;
-  onPrev: any;
-}) {
-  const [progress, setProgress] = useState(0);
-  const [volume, setVolume] = useState(100);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  // Handle Play/Pause side effects
-  useEffect(() => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.play().catch((err) => console.warn("Play interrupted:", err));
-      } else {
-        audioRef.current.pause();
-      }
-    }
-  }, [isPlaying, currentTrack]);
+export default function Player() {
+  const { currentTrack, isPlaying, togglePlay, nextTrack, prevTrack } = usePlayer();
 
   if (!currentTrack) return null;
 
@@ -39,7 +14,6 @@ export default function Player({
         {/* Track Info */}
         <div className="flex items-center space-x-4 w-1/3">
           <div className="w-12 h-12 bg-neutral-800 rounded flex items-center justify-center overflow-hidden">
-             {/* If you have artwork, put it here. For now, a music note. */}
             <span className="text-xl">🎵</span>
           </div>
           <div className="truncate">
@@ -51,36 +25,25 @@ export default function Player({
         {/* Controls */}
         <div className="flex flex-col items-center w-1/3">
           <div className="flex items-center space-x-6">
-            <button onClick={onPrev} className="text-neutral-400 hover:text-white transition">⏮</button>
+            <button onClick={prevTrack} className="text-neutral-400 hover:text-white transition">⏮</button>
             <button 
-              onClick={onPlayPause} 
+              onClick={togglePlay} 
               className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition"
             >
-              {isPlaying ? '⏸' : '▶'}
+              {isPlaying ? <Pause /> : <Play />}
             </button>
-            <button onClick={onNext} className="text-neutral-400 hover:text-white transition">⏭</button>
+            <button onClick={nextTrack} className="text-neutral-400 hover:text-white transition">⏭</button>
           </div>
         </div>
 
-        {/* Volume (Simple Static UI for now) */}
+        {/* Volume (Static) */}
         <div className="hidden md:flex items-center justify-end w-1/3 space-x-2">
           <span className="text-xs text-neutral-500">VOL</span>
           <div className="w-24 h-1 bg-neutral-800 rounded-full overflow-hidden">
-            <div 
-                className="h-full bg-white" 
-                style={{ width: `${volume}%` }} 
-            />
+            <div className="h-full bg-white" style={{ width: `100%` }} />
           </div>
         </div>
       </div>
-      
-      {/* Hidden Audio Element handles the actual sound */}
-      <audio
-        ref={audioRef}
-        src={currentTrack.url}
-        onEnded={onNext}
-        onTimeUpdate={(e) => setProgress(e.currentTarget.currentTime)}
-      />
     </div>
   );
 }
