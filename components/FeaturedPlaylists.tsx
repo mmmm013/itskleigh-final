@@ -1,6 +1,8 @@
-'use client';
-import { useState } from 'react';
+ 'use client';
+import { useState, useEffect } from 'react';
 import { Play, Zap, CloudRain, Moon, Sun, Coffee, Radio } from 'lucide-react';
+import { usePlayer } from './PlayerContext';
+import { getTrackAccess } from '@/utils/entitlements';
 
 // --- CONFIGURATION ---
 const BUCKET_URL = "https://eajxgrbxvkhfmmfiotpm.supabase.co/storage/v1/object/public/tracks";
@@ -16,19 +18,39 @@ const KLEIGH_POOL = [
 ];
 
 export default function FeaturedPlaylists() {
-  
+  const { playTrack } = usePlayer();
+
   const handleVibeClick = (vibe: string) => {
-    const track = KLEIGH_POOL[Math.floor(Math.random() * KLEIGH_POOL.length)];
-    const event = new CustomEvent('play-track', { 
-      detail: { 
-        url: `${BUCKET_URL}/${track.filename}`, 
-        title: track.title, 
-        artist: track.artist,
-        moodColor: track.moodColor
-      } 
-    });
-    window.dispatchEvent(event);
+    const t = KLEIGH_POOL[Math.floor(Math.random() * KLEIGH_POOL.length)];
+    const track = {
+      id: t.filename,
+      title: t.title,
+      artist: t.artist,
+      url: `${BUCKET_URL}/${encodeURIComponent(t.filename)}`,
+      moodColor: t.moodColor
+    };
+    playTrack(track, [track]);
   };
+
+  // track access state map: trackId -> access
+  const [accessMap, setAccessMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    // if any pool items expose an id, check access and cache results
+    KLEIGH_POOL.forEach(async (t) => {
+      const id = (t as any).id || (t as any).filename;
+      if (!id) return;
+      try {
+        const info = await getTrackAccess(String(id));
+        setAccessMap((m) => ({ ...m, [id]: info.access || 'unknown' }));
+      } catch (err) {
+        setAccessMap((m) => ({ ...m, [id]: 'unknown' }));
+      }
+    });
+  }, []);
+
+  // For display in lists: return true if track appears to be locked
+  const isLocked = (track: any) => !track.url && !track.filename;
 
   return (
     <div className="max-w-7xl mx-auto p-6 text-center">
@@ -76,7 +98,13 @@ export default function FeaturedPlaylists() {
           <VibeButton icon={<Coffee size={18}/>} label="Focus" onClick={() => handleVibeClick('FOCUS')} />
           <VibeButton icon={<Sun size={18}/>} label="Uplifting" onClick={() => handleVibeClick('UPLIFTING')} />
           
-          <VibeButton icon={<Zap size={18} fill="currentColor"/>} label="High Energy" isActive={true} onClick={() => handleVibeClick('HIGH_ENERGY')} />
+          <VibeButton
+            icon={<Zap size={18} fill="currentColor"/>}
+            label="High Energy"
+            isActive={true}
+            onClick={() => handleVibeClick('HIGH_ENERGY')}
+            locked={accessMap[KLEIGH_POOL[0].filename] === 'purchase_required'}
+          />
           <VibeButton icon={<Moon size={18}/>} label="Late Night" onClick={() => handleVibeClick('LATE_NIGHT')} />
           <VibeButton icon={<Sun size={18}/>} label="Sunrise" onClick={() => handleVibeClick('SUNRISE')} />
           <VibeButton icon={<Radio size={18}/>} label="Surprise Me" onClick={() => handleVibeClick('RANDOM')} />
@@ -87,7 +115,7 @@ export default function FeaturedPlaylists() {
   );
 }
 
-function VibeButton({ icon, label, isActive = false, onClick }: any) {
+function VibeButton({ icon, label, isActive = false, onClick, locked = false }: any) {
   return (
     <button onClick={onClick}
       className={`group flex flex-col items-center justify-center p-6 rounded-xl border transition-all duration-300 h-32
@@ -98,9 +126,14 @@ function VibeButton({ icon, label, isActive = false, onClick }: any) {
       <div className={`mb-3 transition-colors duration-300 ${isActive ? 'text-[#FFD54F]' : 'text-[#D7CCC8] group-hover:text-[#FFD54F]'}`}>
         {icon}
       </div>
-      <span className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${isActive ? 'text-white' : 'text-[#D7CCC8] group-hover:text-white'}`}>
-        {label}
-      </span>
+      <div className="flex items-center gap-2">
+        <span className={`text-[10px] font-black uppercase tracking-widest transition-colors duration-300 ${isActive ? 'text-white' : 'text-[#D7CCC8] group-hover:text-white'}`}>
+          {label}
+        </span>
+        {locked && (
+          <span className="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded-full font-bold">🔒</span>
+        )}
+      </div>
     </button>
   );
 }

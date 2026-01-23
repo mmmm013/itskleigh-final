@@ -1,55 +1,44 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useMemo } from 'react';
 import { Play, Pause, SkipForward, SkipBack, Zap } from 'lucide-react';
+import { usePlayer } from './PlayerContext';
 
 export default function PremiumPlayer() {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const { currentTrack, isPlaying, playTrack, togglePlay, nextTrack, prevTrack } = usePlayer();
 
   // TRACK CONFIGURATION (Sample Track)
-  const track = {
-    title: "Shine the Light",
-    artist: "G Putnam Music",
-    // Use existing public asset as album art for now
-    cover: "/file.svg",
-    // This is a sample MP3. For production, you will replace this with a real URL from your Supabase data later.
-    audioSrc: "https://s3.amazonaws.com/media.sample.com/shine_light.mp3" 
-  };
+  const sample = useMemo(() => ({
+    id: 'premium-sample',
+    title: 'Shine the Light',
+    artist: 'G Putnam Music',
+    cover: '/file.svg',
+    url: 'https://s3.amazonaws.com/media.sample.com/shine_light.mp3'
+  }), []);
 
-  const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
+  const handleToggle = () => {
+    if (currentTrack?.id === sample.id) {
+      togglePlay();
+    } else {
+      playTrack(sample, [sample]);
     }
   };
 
   return (
     <div className="relative w-full max-w-lg mx-auto overflow-hidden rounded-3xl shadow-2xl bg-neutral-900 border border-neutral-800">
-      
       {/* Dynamic Background Blur */}
       <div 
         className="absolute inset-0 bg-cover bg-center opacity-30 blur-2xl scale-125 transition-transform duration-1000"
-        style={{ 
-          backgroundImage: `url(${track.cover})`,
-          transform: isPlaying ? 'scale(1.3)' : 'scale(1.1)' 
-        }}
+        style={{ backgroundImage: `url(${sample.cover})` }}
       />
-      
+
       {/* Glass Content Layer */}
       <div className="relative z-10 p-8 flex flex-col items-center text-white backdrop-blur-sm">
-        
-        {/* Album Art with "Sponsor Me" Badge */}
         <div className="relative w-64 h-64 mb-6 group">
           <div className="w-full h-full rounded-2xl shadow-2xl overflow-hidden border-2 border-white/10 relative z-0">
-            <img src={track.cover} alt="Album Art" className="object-cover w-full h-full" />
+            <img src={sample.cover} alt="Album Art" className="object-cover w-full h-full" />
           </div>
-          
-          {/* HOVER EFFECT: Shows Sponsor Link */}
+
           <a 
             href="https://buy.stripe.com/4gM14n4KD8Zg1zI8ZO9IQ03" 
             target="_blank"
@@ -60,27 +49,22 @@ export default function PremiumPlayer() {
           </a>
         </div>
 
-        {/* Track Info */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold tracking-tight mb-1">{track.title}</h2>
-          <p className="text-blue-400 text-sm font-medium tracking-wide uppercase">{track.artist}</p>
+          <h2 className="text-2xl font-bold tracking-tight mb-1">{sample.title}</h2>
+          <p className="text-blue-400 text-sm font-medium tracking-wide uppercase">{sample.artist}</p>
         </div>
 
-        {/* Playback Controls */}
         <div className="flex items-center gap-10 mb-8">
-          <button className="text-neutral-400 hover:text-white transition active:scale-95"><SkipBack size={28} /></button>
-          
+          <button onClick={prevTrack} className="text-neutral-400 hover:text-white transition active:scale-95"><SkipBack size={28} /></button>
           <button 
-            onClick={togglePlay}
+            onClick={handleToggle}
             className="bg-white text-black p-5 rounded-full hover:scale-105 transition shadow-[0_0_20px_rgba(255,255,255,0.3)]"
           >
-            {isPlaying ? <Pause size={36} fill="black" /> : <Play size={36} fill="black" className="ml-1" />}
+            {currentTrack?.id === sample.id && isPlaying ? <Pause size={36} fill="black" /> : <Play size={36} fill="black" className="ml-1" />}
           </button>
-          
-          <button className="text-neutral-400 hover:text-white transition active:scale-95"><SkipForward size={28} /></button>
+          <button onClick={nextTrack} className="text-neutral-400 hover:text-white transition active:scale-95"><SkipForward size={28} /></button>
         </div>
 
-        {/* The "Golden" Sponsorship Button */}
         <a 
           href="https://buy.stripe.com/4gM14n4KD8Zg1zI8ZO9IQ03" 
           target="_blank" 
@@ -89,9 +73,6 @@ export default function PremiumPlayer() {
           <Zap size={14} className="text-yellow-200" />
           SPONSOR THIS EXPERIENCE
         </a>
-
-        {/* Hidden Audio Element */}
-        <audio ref={audioRef} src={track.audioSrc} />
       </div>
     </div>
   );

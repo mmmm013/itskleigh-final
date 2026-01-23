@@ -57,12 +57,34 @@ export async function GET(request: Request) {
     }
   }
 
-  // Not in featured playlist
+  // Check entitlements table for purchases of this track
+  const { data: entitlement } = await supabase
+    .from('entitlements')
+    .select('id, track_id, purchased_at')
+    .eq('track_id', track_id)
+    .limit(1)
+    .single()
+
+  if (entitlement) {
+    const { data: signedUrl } = await supabase.storage
+      .from('audio')
+      .createSignedUrl(`${track_id}.mp3`, 3600)
+
+    return NextResponse.json({
+      track_id: track.track_id,
+      title: track.title,
+      artist: track.artist,
+      url: signedUrl?.signedUrl,
+      access: 'purchased'
+    })
+  }
+
+  // Not in featured playlist and not purchased
   return NextResponse.json({
     track_id: track.track_id,
     title: track.title,
     artist: track.artist,
     access: 'purchase_required',
-    message: 'This track is not currently in the featured playlist'
+    message: 'This track is not currently in the featured playlist or purchased'
   }, { status: 403 })
 }

@@ -10,9 +10,9 @@ export default function Header() {
         
         {/* LEFT: Logo & Company Name */}
         <div className="flex items-center gap-4">
-          {/* Placeholder for GPM Logo */}
-          <div className="w-10 h-10 bg-amber-500 rounded-full flex items-center justify-center font-bold text-black border-2 border-white">
-            GP
+          {/* GPM Logo */}
+          <div className="w-10 h-10 overflow-hidden rounded-full border-2 border-white">
+            <img src="/logo.svg" alt="G Putnam Music" className="w-full h-full object-cover" />
           </div>
           <div className="flex flex-col">
             <h1 className="text-xl font-bold text-white tracking-wide uppercase">
@@ -39,14 +39,9 @@ export default function Header() {
 
         {/* RIGHT: QR Code & Join Button */}
         <div className="flex items-center gap-4">
-          {/* QR Code generating a link to the site */}
-          <div className="w-12 h-12 bg-white p-1 rounded">
-             {/* Uses a public API to generate a QR code for your site on the fly */}
-            <img 
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://gputnammusic.com`} 
-              alt="QR Code" 
-              className="w-full h-full object-contain"
-            />
+          {/* Static QR Code (local asset) */}
+          <div className="w-12 h-12 bg-white p-1 rounded overflow-hidden">
+            <img src="/gpm_qrcode.svg" alt="GPM QR" className="w-full h-full object-contain" />
           </div>
           
           {/* STRIPE JOIN BUTTON */}
