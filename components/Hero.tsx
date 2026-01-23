@@ -57,7 +57,15 @@ export default function Hero() {
     // FAIL-SAFE AUDIO URL CONSTRUCTOR
     // If filename is just "song.mp3", we add the storage path. 
     // If it is a full URL, we use it.
-    let url = track.filename;
+    const BUCKET_URL = "https://eajxgrbxvkhfmmfiotpm.supabase.co/storage/v1/object/public/tracks";
+
+    let url = track.audio_url || track.url || track.filename;
+    if (!url) return console.error("No URL for track:", track.title);
+
+    // If the url looks like a filename (no protocol), prefix the bucket
+    if (!/^https?:\/\//i.test(url) && track.filename) {
+      url = `${BUCKET_URL}/${encodeURIComponent(track.filename)}`;
+    }
     
     if (!url) return console.error("No URL for track:", track.title);
 

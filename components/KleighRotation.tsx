@@ -8,8 +8,8 @@ import { Zap } from 'lucide-react';
 // 1. HERO IMAGES ROTATION
 // Add as many filenames as you want here. The system will cycle through them automatically.
 const HERO_IMAGES = [
-  "/gpm_qrcode.png",  // Image 1
-  "/gpm_qrcode.png"   // Image 2 (Replace with real filename when ready)
+  "/k-hero.jpg",
+  "/hero.jpg"
 ];
 
 // 2. THE 7 EXCLUSIVE KLEIGH PLAYLISTS

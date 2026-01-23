@@ -11,8 +11,8 @@ export default function PremiumPlayer() {
   const track = {
     title: "Shine the Light",
     artist: "G Putnam Music",
-    // We use the QR Code as the album art for branding
-    cover: "/gpm_qrcode.png", 
+    // Use existing public asset as album art for now
+    cover: "/file.svg",
     // This is a sample MP3. For production, you will replace this with a real URL from your Supabase data later.
     audioSrc: "https://s3.amazonaws.com/media.sample.com/shine_light.mp3" 
   };
